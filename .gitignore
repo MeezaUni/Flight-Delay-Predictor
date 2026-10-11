@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Large / generated files
+data/*.csv
+models/*.joblib
+
+# Tooling
+.remember/
+.playwright-mcp/
+
+# Third-party reference papers (copyrighted, not redistributed)
+docs/papers/

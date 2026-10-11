@@ -1,0 +1,91 @@
+{
+  "trained_at": "2026-10-11T18:25:40+00:00",
+  "model": "RandomForestClassifier",
+  "params": {
+    "n_estimators": 100,
+    "max_depth": null,
+    "min_samples_leaf": 10
+  },
+  "train_seconds": 8.3,
+  "dataset": {
+    "rows": 539383,
+    "train_rows": 431506,
+    "test_rows": 107877,
+    "delay_rate": 0.4454422923970537
+  },
+  "accuracy": 0.6716074788879928,
+  "roc_auc": 0.7231192131148294,
+  "classification_report": {
+    "On time": {
+      "precision": 0.6783010318921922,
+      "recall": 0.7757421770526879,
+      "f1-score": 0.7237566475881536,
+      "support": 59824.0
+    },
+    "Delayed": {
+      "precision": 0.6600015205656504,
+      "recall": 0.5419640813268682,
+      "f1-score": 0.5951869457902916,
+      "support": 48053.0
+    },
+    "accuracy": 0.6716074788879928,
+    "macro avg": {
+      "precision": 0.6691512762289213,
+      "recall": 0.6588531291897781,
+      "f1-score": 0.6594717966892226,
+      "support": 107877.0
+    },
+    "weighted avg": {
+      "precision": 0.670149651915234,
+      "recall": 0.6716074788879928,
+      "f1-score": 0.6664862388773749,
+      "support": 107877.0
+    }
+  },
+  "confusion_matrix": {
+    "labels": [
+      "On time",
+      "Delayed"
+    ],
+    "matrix": [
+      [
+        46408,
+        13416
+      ],
+      [
+        22010,
+        26043
+      ]
+    ]
+  },
+  "feature_importance": [
+    {
+      "feature": "Time",
+      "importance": 0.23116680937159723
+    },
+    {
+      "feature": "Airline",
+      "importance": 0.20162553012529336
+    },
+    {
+      "feature": "Flight",
+      "importance": 0.16250750775248923
+    },
+    {
+      "feature": "Length",
+      "importance": 0.13549991154056223
+    },
+    {
+      "feature": "AirportFrom",
+      "importance": 0.104141618765415
+    },
+    {
+      "feature": "AirportTo",
+      "importance": 0.09362195103685611
+    },
+    {
+      "feature": "DayOfWeek",
+      "importance": 0.07143667140778687
+    }
+  ]
+}

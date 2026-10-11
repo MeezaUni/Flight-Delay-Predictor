@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flight Delay Predictor</title>
+  <meta name="description" content="Predict whether a US domestic flight will be delayed, using a Random Forest trained on 539,383 flights.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23162a3e'/%3E%3Cpath d='M6 19l20-6-3 4-11 2 5 6h-3l-6-5z' fill='%23ffc23d'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#flight-form">Skip to the flight form</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="#top" aria-label="Flight Delay Predictor, home">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6"/><path d="M6 19l20-6-3 4-11 2 5 6h-3l-6-5z"/></svg>
+        <span>Flight Delay Predictor</span>
+      </a>
+      <nav aria-label="Sections">
+        <a href="#predict">Predict</a>
+        <a href="#model">Model performance</a>
+        <a href="/docs">API</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="board-section" aria-labelledby="board-title">
+      <div class="wrap">
+        <div class="board-intro">
+          <h1 id="board-title">Will your flight leave on time?</h1>
+          <p>Enter a US domestic flight and a Random Forest trained on <span data-metric="rows">539,383</span> past flights estimates the chance it gets delayed.</p>
+        </div>
+
+        <div class="board" role="region" aria-label="Your forecasts">
+          <div class="board-head">
+            <span class="board-title">Departures</span>
+            <span class="board-clock" id="board-clock" aria-hidden="true">--:--</span>
+          </div>
+          <table class="board-table">
+            <caption class="visually-hidden">Flights you have checked, newest first</caption>
+            <thead>
+              <tr>
+                <th scope="col">Time</th>
+                <th scope="col">Flight</th>
+                <th scope="col">From</th>
+                <th scope="col">To</th>
+                <th scope="col" class="num">Delay risk</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody id="board-rows" aria-live="polite"></tbody>
+          </table>
+          <p class="board-empty" id="board-empty">No flights checked yet. Fill in the form below and your forecast appears here.</p>
+          <div class="board-foot">
+            <button type="button" class="board-clear" id="board-clear" hidden>Clear board</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="predict-section" id="predict" aria-labelledby="predict-title">
+      <div class="wrap predict-grid">
+        <form class="pass" id="flight-form" novalidate>
+          <div class="pass-main">
+            <h2 id="predict-title">Flight details</h2>
+
+            <div class="field-row route-row">
+              <div class="field">
+                <label for="origin">From</label>
+                <input id="origin" name="origin" class="code-input" list="airport-list" autocomplete="off" maxlength="3" placeholder="ATL" required>
+              </div>
+              <button type="button" class="swap" id="swap" aria-label="Swap origin and destination">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h12m0 0l-4-4m4 4l-4 4M17 17H5m0 0l4-4m-4 4l4 4"/></svg>
+              </button>
+              <div class="field">
+                <label for="destination">To</label>
+                <input id="destination" name="destination" class="code-input" list="airport-list" autocomplete="off" maxlength="3" placeholder="JFK" required>
+              </div>
+            </div>
+            <datalist id="airport-list"></datalist>
+
+            <div class="field-row">
+              <div class="field grow">
+                <label for="airline">Airline</label>
+                <select id="airline" name="airline" required>
+                  <option value="">Loading airlines…</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="flight">Flight number</label>
+                <input id="flight" name="flight" type="number" inputmode="numeric" min="1" max="9999" value="1234" required>
+              </div>
+            </div>
+
+            <fieldset class="field days">
+              <legend>Day of week</legend>
+              <div class="day-options" id="day-options"></div>
+            </fieldset>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="departure">Departure time</label>
+                <input id="departure" name="departure" type="time" value="18:30" required>
+              </div>
+              <div class="field grow">
+                <label for="length">Flight length (minutes)</label>
+                <input id="length" name="length" type="number" inputmode="numeric" min="1" max="1000" value="120" required>
+                <p class="hint" id="route-hint">Pick both airports to fill in the typical flight length.</p>
+              </div>
+            </div>
+
+            <p class="form-error" id="form-error" role="alert" hidden></p>
+          </div>
+
+          <div class="pass-stub">
+            <div class="stub-summary" aria-hidden="true">
+              <p class="stub-route" id="stub-route">ATL <span>to</span> JFK</p>
+              <p class="stub-meta" id="stub-flight">DL 1234</p>
+              <p class="stub-meta" id="stub-when">Wed 18:30</p>
+            </div>
+            <button type="submit" class="predict-btn" id="predict-btn">Predict delay</button>
+          </div>
+        </form>
+
+        <aside class="forecast" id="forecast" aria-live="polite" aria-labelledby="forecast-title">
+          <h2 id="forecast-title">Forecast</h2>
+          <div class="forecast-empty" id="forecast-empty">
+            <p>Your result shows here: whether the flight is likely to be delayed, and how sure the model is.</p>
+          </div>
+          <div class="forecast-result" id="forecast-result" hidden>
+            <p class="verdict" id="verdict"></p>
+            <p class="verdict-route" id="verdict-route"></p>
+            <div class="meter" aria-hidden="true">
+              <div class="meter-track">
+                <div class="meter-fill" id="meter-fill"></div>
+                <div class="meter-threshold"><span>50%</span></div>
+              </div>
+              <div class="meter-scale"><span>0%</span><span>100%</span></div>
+            </div>
+            <p class="probability" id="probability"></p>
+            <p class="forecast-note" id="forecast-note"></p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="model-section" id="model" aria-labelledby="model-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="model-title">How well the model performs</h2>
+          <p>Scores come from <span data-metric="test_rows">107,877</span> flights the model never saw during training.</p>
+        </div>
+
+        <dl class="stats" id="stats">
+          <div><dt>Accuracy</dt><dd id="stat-accuracy">–</dd></div>
+          <div><dt>ROC AUC</dt><dd id="stat-auc">–</dd></div>
+          <div><dt>Training flights</dt><dd id="stat-train">–</dd></div>
+          <div><dt>Flights delayed in data</dt><dd id="stat-delay">–</dd></div>
+        </dl>
+
+        <div class="charts">
+          <figure class="chart-card">
+            <figcaption>
+              <h3>Confusion matrix</h3>
+              <p>How test flights were classified. Darker cells hold more flights.</p>
+            </figcaption>
+            <div class="cm" id="confusion-matrix"></div>
+          </figure>
+
+          <figure class="chart-card">
+            <figcaption>
+              <h3>What drives the prediction</h3>
+              <p>Share of the forest's decisions each input accounts for.</p>
+            </figcaption>
+            <ol class="bars" id="importance"></ol>
+          </figure>
+
+          <figure class="chart-card wide">
+            <figcaption>
+              <h3>Precision and recall by class</h3>
+              <p>Precision: when the model says delayed, how often it is right. Recall: how many truly delayed flights it catches.</p>
+            </figcaption>
+            <table class="report-table">
+              <thead>
+                <tr><th scope="col">Class</th><th scope="col" class="num">Precision</th><th scope="col" class="num">Recall</th><th scope="col" class="num">F1 score</th><th scope="col" class="num">Test flights</th></tr>
+              </thead>
+              <tbody id="report-rows"></tbody>
+            </table>
+          </figure>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Machine Learning mini project. Data: Airlines delay dataset (Kaggle / OpenML), 539,383 US domestic flights. Model: scikit-learn Random Forest.</p>
+      <p id="trained-at"></p>
+    </div>
+  </footer>
+
+  <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
