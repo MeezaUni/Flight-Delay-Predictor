@@ -12,7 +12,7 @@ departure time) and the app gives you the chance of a delay.
 ## Quick start (Windows)
 
 Double-click `run.bat`. It downloads the data, trains the model on the first run and
-opens http://127.0.0.1:8000.
+opens http://127.0.0.1:8642 (change `PORT` at the top of the file if that port is taken).
 
 ## Manual setup
 
@@ -23,10 +23,10 @@ pip install -r requirements.txt
 
 python scripts/download_data.py # writes data/Airlines.csv (about 20 MB)
 python -m ml.train              # writes models/flight_model.joblib and models/metrics.json
-uvicorn backend.main:app --reload
+uvicorn backend.main:app --reload --port 8642
 ```
 
-Then open http://127.0.0.1:8000 for the app or http://127.0.0.1:8000/docs for the API.
+Then open http://127.0.0.1:8642 for the app or http://127.0.0.1:8642/docs for the API.
 
 To change the forest's settings:
 
@@ -56,7 +56,8 @@ pytest
 │   ├── train.py         Train, evaluate, save model and metrics
 │   └── predict.py       Load the model and predict one flight
 ├── scripts/
-│   └── download_data.py Fetch the dataset (no Kaggle account needed)
+│   ├── download_data.py Fetch the dataset (no Kaggle account needed)
+│   └── open_browser.py  Opens the app once the server is ready (used by run.bat)
 ├── tests/
 │   └── test_api.py
 ├── data/                Airlines.csv (not committed)
@@ -110,7 +111,7 @@ which is where `download_data.py` gets it. If you already have the Kaggle `Airli
 Example request:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/api/predict -H "Content-Type: application/json" \
+curl -X POST http://127.0.0.1:8642/api/predict -H "Content-Type: application/json" \
   -d '{"airline":"DL","flight":1234,"origin":"ATL","destination":"JFK","day_of_week":3,"departure_minutes":1110,"length_minutes":145}'
 ```
 
